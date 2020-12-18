@@ -409,7 +409,6 @@ function getBlocks(NB_PLAYERS) {
 // Return {shape(LTRV): [maxValue, sw, sh, sdefHash, sdefN, shiftw, shifth]}
 function computeShapeDefinitions([sid, scol, srow, definition]) {
   const result = {}
-  const shapeKeySet = [];
 
   const maxValue = definition.split('').filter(c => c === '#').length
 
@@ -417,17 +416,12 @@ function computeShapeDefinitions([sid, scol, srow, definition]) {
     for (let rotate in [0, 1, 2, 3]) {
       const [sw, sh, sdefHash, sdefN] = transformShape(scol, srow, toSdefN(definition), flip, rotate)
       for (let value = 1; value <= maxValue; value++) {
-        const shapeKey = sw.toString() + sh.toString() + sdefHash;
-        if (!shapeKeySet.includes(shapeKey)) {  // prevent adding 2 equivalent shapes
-          shapeKeySet.push(shapeKey);
+        const shiftw = sdefN.indexOf(value.toString()) % sw;
+        const shifth = Math.floor(sdefN.indexOf(value.toString()) / sw);
 
-          const shiftw = sdefN.indexOf(value.toString()) % sw;
-          const shifth = Math.floor(sdefN.indexOf(value.toString()) / sw);
+        const shape = sid + flip.toString() + rotate.toString() + value.toString();
 
-          const shape = sid + flip.toString() + rotate.toString() + value.toString();
-
-          result[shape] = [maxValue, sw, sh, sdefHash, sdefN, shiftw, shifth]
-        }
+        result[shape] = [maxValue, sw, sh, sdefHash, sdefN, shiftw, shifth]
       }
     }
   }
