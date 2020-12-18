@@ -1,6 +1,5 @@
 //TODO : include cells in shape dict, and change how allowed moves are calculated
 // TODO: there's a diff between codingame's allowed moves and my allowed moves
-// TODO : pb when placing a block that touches its sides
 
 const fs = require('fs');
 
@@ -171,10 +170,11 @@ function placeShapeOnBoard(move, board, playerIds) {
     if (_x < 0 || _x >= BOARD_SIZE || _y < 0 || y >= BOARD_SIZE) return null;
     if (_board[_x][_y] != '.') return null;
 
+
     if (sdefIds.charAt(i) === playerIds) {
-      if (getSides(_board, _x, _y).includes(playerIds)) return null;
+      if (getSides(board, _x, _y).includes(playerIds)) return null;
     }
-    else _board[_x][_y] = sdefIds.charAt(i);
+    _board[_x][_y] = sdefIds.charAt(i);
   }
   return _board;
 }
