@@ -1,4 +1,3 @@
-// create github
 //TODO : include cells in shape dict, and change how allowed moves are calculated
 // TODO: there's a diff between codingame's allowed moves and my allowed moves
 // TODO : pb when placing a block that touches its sides
@@ -15,9 +14,9 @@ const MCTS_TIME_CONSTRAINT = 1500;
 
 // Init game helper information
 // {shape(LTRV): [maxValue, sw, sh, sdefHash, sdefN, shiftw, shifth]}
-let shapeDict = {};
+let SHAPES = {};
 for (let block of BLOCKS) {
-  shapeDict = { ...shapeDict, ...computeShapeDefinitions(block) }
+  SHAPES = { ...SHAPES, ...computeShapeDefinitions(block) }
 }
 
 const initialState = initializeState(NB_PLAYERS, BLOCKS)
@@ -159,7 +158,7 @@ function getSides(board, i, j) {
 // if shape is placed on an occupied cell, or touched the side of another shape, return null
 function placeShapeOnBoard(move, board, playerIds) {
   const [x, y, shape] = move;
-  const shapeInfo = shapeDict[shape];
+  const shapeInfo = SHAPES[shape];
   const [maxValue, sw, sh, sdefHash, sdefN, shiftw, shifth] = shapeInfo
 
   const sdefIds = sdefHash.split('#').join(playerIds);
@@ -264,7 +263,7 @@ function computeNextStates(prevState) {
       state.playedMoves = [...prevState.playedMoves, [playerId, move]];
 
       const playedShape = move[2]
-      state.players[playerId].score += shapeDict[playedShape][0];
+      state.players[playerId].score += SHAPES[playedShape][0];
 
       const playedBlock = move[2].charAt(0);
       state.players[playerId].blocks.splice(state.players[playerId].blocks.indexOf(playedBlock), 1);
@@ -335,7 +334,7 @@ function computeAllowedBlocks(turn, playerIds, playerBlocks) {
 function computeAllowedShapes(blocks) {
   const shapes = [];
 
-  for (shape in shapeDict) {
+  for (shape in SHAPES) {
     for (block of blocks) {
       if (shape.startsWith(block)) {
         shapes.push(shape);
@@ -376,7 +375,7 @@ function initializeState(NB_PLAYERS, BLOCKS) {
 
 //#region Generate initial state
 function getBlocks(NB_PLAYERS) {
-  const shapes = [
+  const blocks = [
     ['A', 1, 1, '#'],
     ['B', 2, 1, '##'],
     ['C', 3, 1, '###'],
@@ -401,9 +400,9 @@ function getBlocks(NB_PLAYERS) {
   ];
 
   switch (NB_PLAYERS) {
-    case 2: return shapes.slice(0, 18);
-    case 3: return shapes.slice(0, 13);
-    case 4: return shapes.slice(0, 10);
+    case 2: return blocks.slice(0, 18);
+    case 3: return blocks.slice(0, 13);
+    case 4: return blocks.slice(0, 10);
   }
 }
 
