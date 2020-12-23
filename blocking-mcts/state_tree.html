@@ -46,7 +46,7 @@
 
   <script>
 
-    const treeHeight = 4000;
+    const treeHeight = 14000;
     const treeWidth = 10000; //old value : 960
 
     var treeData = JSON.parse(data);
@@ -200,8 +200,10 @@
       if (d.id != nodeOnFocusId) {
         nodeOnFocusId = d.id;
         let s = 'NODE\n'
-        s += 'Visited: ' + (d.visited != null ? d.visited.toString() : '') + '\n';
         s += 'Fully expanded: ' + (d.fullyExpanded != null ? d.fullyExpanded.toString() : '') + '\n';
+        s += 'Expanded: ' + (d.expanded != null ? d.expanded.toString() : '') + '\n';
+        s += 'Visited: ' + (d.visited != null ? d.visited.toString() : '') + '\n';
+        s += 'Simulated: ' + (d.simulated != null ? d.simulated.toString() : '') + '\n';
         s += 'Leaf: ' + (d.leaf != null ? d.leaf.toString() : '') + '\n';
         s += 'Q: ' + (d.Q != null ? d.Q.toString() : '') + '\n';
         s += 'N: ' + (d.N != null ? d.N.toString() : '') + '\n';

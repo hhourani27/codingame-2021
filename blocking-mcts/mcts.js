@@ -1,4 +1,3 @@
-//TODO : include cells in shape dict, and change how allowed moves are calculated
 // TODO: there's a diff between codingame's allowed moves and my allowed moves
 
 const fs = require('fs');
@@ -9,7 +8,7 @@ const BOARD_SIZE = 13;
 const NB_PLAYERS = 2;
 const BLOCKS = getBlocks(NB_PLAYERS);
 
-const MCTS_TIME_CONSTRAINT = 1500;
+const MCTS_TIME_CONSTRAINT = 2000;
 
 // Init game helper information
 // {shape(LTRV): [maxValue, sw, sh, sdefHash, sdefN, shiftw, shifth]}
@@ -24,9 +23,10 @@ const root = {
   state: initialState,
   Q: 0,
   N: 0,
-  fullyExpanded: false,
-  visited: false,
-  simulated: true,
+  fullyExpanded: false, // All the children of this node have been visited
+  expanded: false, // All the children of this node have been created and are ready to be visited
+  visited: false, // A simulation started at this node
+  simulated: true, // This node was part of a simulation
   leaf: false,
   parent: null
 }
@@ -44,61 +44,74 @@ function monte_carlo_tree_search(root, timeConstraint) {
   while ((process.hrtime.bigint() - startTime) < timeConstraint * 1000000) {
     console.count('loop');
     const node = traverse(root);
-    const simulation_winners = rollout(node);
+    const simulation_winners = simulate(node);
     backpropagate(node, simulation_winners);
   }
 }
 
 function traverse(node) {
   let _node = node;
+
+  // If node is fully expanded, descend the game tree (by best uct) to find the next node
   while (_node.fullyExpanded) {
     _node = best_uct(_node);
   }
 
-  const children = getChildren(_node);
-  if (children) {
-    const unvisitedChildren = children.filter(c => c.visited == false);
-    const pickedUnvisitedChild = unvisitedChildren[Math.floor(Math.random() * unvisitedChildren.length)];
+  // Expand node if it is not already expanded
+  if (!_node.expanded) {
+    _node.children = expand(_node);
+    _node.expanded = true;
+  }
+
+  //Pick a children at random
+  if (!_node.leaf) { // if it is not a leaf
+    const unvisitedChildren = _node.children.filter(c => c.visited == false);
+    const pickedUnvisitedChild = pickRandomElement(unvisitedChildren);
+    pickedUnvisitedChild.visited = true;
+
+    // Check if node became fully expanded
+    if (_node.children.every(c => c.visited == true)) _node.fullyExpanded = true;
+
     return pickedUnvisitedChild;
   }
   else {
-    return _node
+    return node;
   }
 }
 
 function best_uct(node) {
-  const children = getChildren(node);
-  const uctScores = children.map(child => uct(child));
+  const uctScores = node.children.map(child => uct(child));
 
   const maxUctScore = Math.max(...uctScores);
-  const bestChild = children[uctScores.indexOf(maxUctScore)];
+  const bestChild = node.children[uctScores.indexOf(maxUctScore)];
   return bestChild;
 }
 
 function uct(node) {
   const exploitationComponent = node.Q / node.N;
-  const c = Math.SQRT2;
+  //  const c = Math.SQRT2;
+  const c = 0;
   const explorationComponent = Math.sqrt(Math.log(node.parent.N) / node.N);
   const uct = exploitationComponent + c * explorationComponent;
   return uct;
 }
 
-function rollout(node) {
+function simulate(node) {
+  console.log('Start simulation');
   let _node = node;
+  //Go down fast on the game tree until the end
   while (!_node.leaf) {
     _node.simulated = true;
 
-    const children = getChildren(_node);
-    if (!children) break;
-    _node = children[Math.floor(Math.random() * children.length)];
+    const child = pickNextNode(_node);
+    if (!child) break;
+    else _node = child;
   }
+
+  // Return the winners
   const finalScores = _node.state.players.map(p => p.score);
   const maxScore = Math.max(...finalScores);
   const winningPlayers = _node.state.players.filter(p => p.score == maxScore);
-
-  // at the end of simulation update node visited status and its parent's fullyExpanded status
-  node.visited = true;
-  if (node.parent.children.every(c => c.visited == true)) node.parent.fullyExpanded = true;
 
   return winningPlayers.map(p => p.id);
 }
@@ -212,13 +225,8 @@ function transpose(board) {
 //#region State functions
 
 // return null if this node has no children or is a terminal node
-function getChildren(node) {
-  // If it's a terminal node, return null
-  if (node.leaf) return null;
-  //else, if we already computed its children, return them
-  if (node.children) return node.children;
-
-  //else compute the node's children and return them
+function expand(node) {
+  //compute the node's children and return them
   const nextStates = computeNextStates(node.state);
   //if it's a terminal node after all, mark it as such and return null
   if (nextStates.length == 0) {
@@ -231,15 +239,16 @@ function getChildren(node) {
     Q: 0,
     N: 0,
     fullyExpanded: false,
+    expanded: false,
     visited: false,
     simulated: false,
     leaf: false,
-    parent: node
+    parent: node,
+    children: [],
   }));
   node.children = children;
 
   return children;
-
 }
 
 function computeNextStates(prevState) {
@@ -273,7 +282,6 @@ function computeNextStates(prevState) {
   }
 
   return [];
-
 }
 
 function computeMoves(turn, playerIds, playerBlocks, board) {
@@ -296,6 +304,85 @@ function computeMoves(turn, playerIds, playerBlocks, board) {
   }
 
   return allowedMoves_boards;
+}
+
+function pickNextNode(node) {
+  console.log('Pick next node in simulation')
+  const nextState = pickNextState(node.state);
+  if (!nextState) {
+    node.leaf = true;
+    return null;
+  }
+
+  const child = {
+    state: nextState,
+    Q: 0,
+    N: 0,
+    fullyExpanded: false,
+    expanded: false,
+    visited: false,
+    simulated: false,
+    leaf: false,
+    parent: node,
+    children: []
+  }
+  node.children.push(child);
+  return child;
+}
+
+function pickNextState(prevState) {
+  console.log('Pick next state in simulation')
+  const turn = prevState.turn + 1;
+
+  for (let i = 1; i <= NB_PLAYERS; i++) {
+    const playerId = (prevState.playerId + i) % NB_PLAYERS
+    const player = prevState.players[playerId];
+    const move_board = pickMove(turn, player.ids, player.blocks, prevState.board);
+    if (!move_board) continue;
+
+    const [move, board] = move_board
+    const state = {};
+    state.turn = turn;
+    state.status = 'RUN';
+    state.board = board;
+    state.players = clone(prevState.players);
+    state.playerId = playerId;
+    state.move = move;
+    state.playedMoves = [...prevState.playedMoves, [playerId, move]];
+
+    const playedShape = move[2]
+    state.players[playerId].score += SHAPES[playedShape][0];
+
+    const playedBlock = move[2].charAt(0);
+    state.players[playerId].blocks.splice(state.players[playerId].blocks.indexOf(playedBlock), 1);
+    return state;
+  }
+
+  return null;
+}
+
+function pickMove(turn, playerIds, playerBlocks, board) {
+  console.log('Pick next move in simulation');
+  const allowedCells = computeAllowedCells(turn, playerIds, board);
+  if (allowedCells.length == 0) return null;
+  shuffle(allowedCells);
+
+  const allowedBlocks = computeAllowedBlocks(turn, playerIds, playerBlocks);
+  if (allowedBlocks.length == 0) return null;
+
+  const allowedShapes = computeAllowedShapes(allowedBlocks);
+  shuffle(allowedShapes);
+
+  for (const [i, j] of allowedCells) {
+    for (const shape of allowedShapes) {
+      console.log('Try move');
+      const move = [i, j, shape];
+      const _board = placeShapeOnBoard(move, board, playerIds);
+      if (_board) return [move, _board];
+    }
+  }
+
+  return null;
 }
 
 function computeAllowedCells(turn, playerIds, board) {
@@ -514,6 +601,17 @@ function clone(obj) {
   return JSON.parse(JSON.stringify(obj))
 }
 
+function pickRandomElement(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
 //#endregion
 
 //#region Print tree
@@ -531,7 +629,15 @@ function printTree(root) {
 
     // add children to the stack
     if (node.children) {
-      node.children = node.children.filter(c => c.simulated == true);
+      /*      node.children = node.children.filter(c => {
+              if (c.parent.expanded == true) {
+                if (c.visited == false) return false;
+                else return true;
+              }
+              else return true;
+            });
+            */
+      node.children = node.children.filter(c => c.visited == true);
       stack.push(...node.children);
     }
   }
