@@ -176,6 +176,15 @@ for e in elevators+((exit_floor,exit_pos),):
     else:
         f_elevators[f] = [e]
     
+allowed_y_elevators = dict()
+for i in range(0,exit_floor):
+    allowed_y_elevators[i] = set()
+    for j in range(i+1,exit_floor):
+        for e in elevators:
+            if e[0] == j:
+                allowed_y_elevators[i].add(e[1])
+    allowed_y_elevators[i].add(exit_pos)
+    
 def get_closest_elevators(f) :
     result = []
     for i in range(f+1,exit_floor):
@@ -265,7 +274,7 @@ while len(frontier) > 0:
     
     if next_clones_left > 0 and next_add_elevator_left > 0 and next_f < exit_floor:
         if (next_f,next_y) not in elevators : #don't add an elevator on an existing elevator
-            if any(next_y == e[1] for e in get_closest_elevators(next_f)) :  #only add elevators under an existing elevator or under exit
+            if next_y in allowed_y_elevators[next_f] :  #only add elevators under an existing elevator or under exit
                 next_ELEVATOR = next_state + (ELEVATOR,)
                 frontier.append(next_ELEVATOR)
                 parent[next_ELEVATOR] = current
