@@ -140,6 +140,24 @@ test_cases = {
 }
 }
 
+def printActions(end_node, parent) :
+    actions = []
+    current = end_node
+    while current is not None:
+        print(current)
+        
+        action = current[6]
+        if action == WAIT:
+            actions = [action] + actions
+        elif action == BLOCK:
+            actions = [action,WAIT,WAIT] + actions
+        elif action == ELEVATOR:
+            actions = [action,WAIT,WAIT,WAIT] + actions
+    
+        current = parent[current]
+
+    print(actions)
+
 
 #%%
 
@@ -218,7 +236,7 @@ while len(frontier) > 0:
         next_f = f + 1
         next_add_elevator_left = add_elevator_left - 1
         next_clones_left = clones_left - 1
-        next_round = round + 3
+        next_round = round + 4
         
     # check if next state is a lost one
     if next_y < 0 or next_y >= width:
@@ -252,21 +270,9 @@ while len(frontier) > 0:
                 frontier.append(next_ELEVATOR)
                 parent[next_ELEVATOR] = current
 
-actions = []
-while current is not None:
-    print(current)
-    
-    action = current[6]
-    if action == WAIT:
-        actions = [action] + actions
-    elif action == BLOCK:
-        actions = [action,WAIT,WAIT] + actions
-    elif action == ELEVATOR:
-        actions = [action,WAIT,WAIT,WAIT] + actions
 
-    current = parent[current]
+printActions(current, parent)
 
-print(actions)
 #%%
 '''
 for after,before in parent.items():
