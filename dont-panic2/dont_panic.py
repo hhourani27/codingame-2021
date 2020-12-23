@@ -177,10 +177,11 @@ for e in elevators+((exit_floor,exit_pos),):
         f_elevators[f] = [e]
     
 def get_closest_elevators(f) :
-    for i in range(f+1,exit_floor+1):
+    result = []
+    for i in range(f+1,exit_floor):
         if i in f_elevators:
-            return f_elevators[i]
-    return []
+            result += f_elevators[i]
+    return result + [(exit_floor,exit_pos)]
 
 start_state = (start_floor,start_pos,RIGHT,1,nb_total_clones,nb_add_elevators)
 start_WAIT = start_state + (WAIT,)
@@ -256,9 +257,8 @@ while len(frontier) > 0:
     parent[next_WAIT] = current
 
     # Only block at the exit of elevators
-    if next_clones_left > 0 and action != BLOCK:
+    if next_clones_left > 0:
         if next_f > f and (next_f,next_y) not in elevators:
-        #if (next_f,next_y) not in elevators : #temp condition to test
             next_BLOCK = next_state + (BLOCK,)
             frontier.append(next_BLOCK)
             parent[next_BLOCK] = current
