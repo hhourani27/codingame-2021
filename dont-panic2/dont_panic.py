@@ -143,12 +143,12 @@ test_cases = {
 
 #%%
 
-test_case = test_cases[7]
+test_case = test_cases[8]
 nb_floors,width,nb_rounds,exit_floor,exit_pos,nb_total_clones,nb_add_elevators,nb_elevators,elevators,start_floor,start_pos=[k[1] for k in test_case.items()]
 
 
 #Node
-#(f,y,direction,round,elevators,clones_left,add_elevators_left,blocked_floors,action_for_next_round)
+#(f,y,direction,round,elevators,clones_left,add_elevators_left,action_for_next_round)
 
 f_elevators = dict()
 for e in elevators+((exit_floor,exit_pos),):
@@ -164,7 +164,7 @@ def get_closest_elevators(f) :
             return f_elevators[i]
     return []
 
-start_state = (start_floor,start_pos,RIGHT,1,nb_total_clones,nb_add_elevators,())
+start_state = (start_floor,start_pos,RIGHT,1,nb_total_clones,nb_add_elevators)
 start_WAIT = start_state + (WAIT,)
 start_BLOCK = start_state + (BLOCK,)
 
@@ -186,7 +186,6 @@ if nb_add_elevators > 0:
 loop = 0
 start_time = time.time()
 while len(frontier) > 0:
-    if loop == 1000000: break
     if loop % 100000 == 0:
         loop_duration = time.time() - start_time
         print('Loop: {}, tree: {}, frontier: {}, {:.1f} s'
@@ -195,8 +194,8 @@ while len(frontier) > 0:
     loop += 1
     
     current  = frontier.popleft()
-    f,y,dir,round,clones_left,add_elevator_left,blocked_floors,action = current
-    next_f,next_y,next_dir,next_round,next_clones_left,next_add_elevator_left,next_blocked_floors,next_action = current
+    f,y,dir,round,clones_left,add_elevator_left,action = current
+    next_f,next_y,next_dir,next_round,next_clones_left,next_add_elevator_left,next_action = current
 
     
     # check if I arrived to goal
@@ -214,7 +213,6 @@ while len(frontier) > 0:
     elif action == BLOCK:
         next_dir = RIGHT if dir == LEFT else LEFT
         next_clones_left = clones_left - 1
-        next_blocked_floors = blocked_floors + (f,)
         next_round = round + 3
     elif action == ELEVATOR:
         next_f = f + 1
@@ -233,21 +231,19 @@ while len(frontier) > 0:
         continue
         # check if there's no more add elevators and there's floors with no elevators
     
-    next_state = (next_f,next_y,next_dir,next_round,next_clones_left,next_add_elevator_left,next_blocked_floors)
+    next_state = (next_f,next_y,next_dir,next_round,next_clones_left,next_add_elevator_left)
     # decide on possible actions
     next_WAIT = next_state + (WAIT,)
     frontier.append(next_WAIT)
     parent[next_WAIT] = current
 
     # Only block at the exit of elevators
-    if next_clones_left > 0 :
-        if True:
-#        if next_f not in next_blocked_floors: #only use one block per floor
-            if next_f > f and (next_f,next_y) not in elevators:
-            #if (next_f,next_y) not in elevators : #temp condition to test
-                next_BLOCK = next_state + (BLOCK,)
-                frontier.append(next_BLOCK)
-                parent[next_BLOCK] = current
+    if next_clones_left > 0 and action != BLOCK:
+        if next_f > f and (next_f,next_y) not in elevators:
+        #if (next_f,next_y) not in elevators : #temp condition to test
+            next_BLOCK = next_state + (BLOCK,)
+            frontier.append(next_BLOCK)
+            parent[next_BLOCK] = current
     
     if next_clones_left > 0 and next_add_elevator_left > 0 and next_f < exit_floor:
         if (next_f,next_y) not in elevators : #don't add an elevator on an existing elevator
@@ -260,7 +256,7 @@ actions = []
 while current is not None:
     print(current)
     
-    action = current[7]
+    action = current[6]
     if action == WAIT:
         actions = [action] + actions
     elif action == BLOCK:
@@ -279,4 +275,4 @@ for after,before in parent.items():
 '''
 frontier = list(frontier)
 f1 = list(filter(lambda x :x[0] == 0 and x[6] == BLOCK,frontier))
-f2 = sorted(f1, key = lambda x : (x[0],x[1]))
+f2 = sorted(f1, key = lambda x : (x[0],x[1]))	
