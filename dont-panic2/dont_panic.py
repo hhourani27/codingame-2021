@@ -137,6 +137,20 @@ test_cases = {
 'elevators' : ((6, 65), (11, 4), (8, 34), (8, 56), (7, 17), (8, 1), (2, 24), (11, 13), (10, 23), (6, 13), (6, 34), (5, 4), (1, 50), (5, 46), (3, 17), (10, 3), (11, 42), (1, 17), (1, 4), (2, 23), (8, 66), (2, 3), (1, 24), (1, 34), (8, 9), (2, 58), (11, 11), (11, 38), (8, 23), (6, 57)),
 'start_floor' : 0,
 'start_pos' : 33,
+},
+#Test 10 : Giant map
+#  nodes in game tree 
+10:{'nb_floors' : 13,
+'width' : 69,
+'nb_rounds' : 109,
+'exit_floor' : 11,
+'exit_pos' : 47,
+'nb_total_clones' : 100,
+'nb_add_elevators' : 4,
+'nb_elevators' :  36,
+'elevators' : ((2, 56), (4, 23), (8, 1), (3, 30), (4, 9), (9, 17), (11, 45), (6, 9), (1, 24), (7, 48), (3, 24), (8, 63), (10, 45), (9, 2), (2, 23), (3, 17), (10, 3), (1, 36), (2, 9), (10, 23), (1, 62), (1, 17), (1, 4), (8, 23), (2, 43), (2, 3), (6, 3), (6, 23), (5, 4), (6, 35), (11, 4), (11, 50), (8, 9), (1, 50), (2, 24), (3, 60)),
+'start_floor' : 0,
+'start_pos' : 6,
 }
 }
 
@@ -168,29 +182,19 @@ nb_floors,width,nb_rounds,exit_floor,exit_pos,nb_total_clones,nb_add_elevators,n
 #Node
 #(f,y,direction,round,elevators,clones_left,add_elevators_left,action_for_next_round)
 
-f_elevators = dict()
-for e in elevators+((exit_floor,exit_pos),):
-    f = e[0]
-    if f in f_elevators:
-        f_elevators[f].append(e)
-    else:
-        f_elevators[f] = [e]
-    
 allowed_y_elevators = dict()
-for i in range(0,exit_floor):
+allowed_y_elevators[0] = set()
+for i in range(1,exit_floor-1):
     allowed_y_elevators[i] = set()
-    for j in range(i+1,exit_floor):
-        for e in elevators:
-            if e[0] == j:
+    for e in elevators + ((0,start_pos),):
+        if e[0] == i-1:
                 allowed_y_elevators[i].add(e[1])
-    allowed_y_elevators[i].add(exit_pos)
+allowed_y_elevators[exit_floor-1] = {exit_pos}
+
+for i in range(1,exit_floor):
+    if len(allowed_y_elevators[i]) == 0:
+        allowed_y_elevators[i] = allowed_y_elevators[i-1]
     
-def get_closest_elevators(f) :
-    result = []
-    for i in range(f+1,exit_floor):
-        if i in f_elevators:
-            result += f_elevators[i]
-    return result + [(exit_floor,exit_pos)]
 
 start_state = (start_floor,start_pos,RIGHT,1,nb_total_clones,nb_add_elevators)
 start_WAIT = start_state + (WAIT,)
