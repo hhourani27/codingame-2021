@@ -1,16 +1,9 @@
 import numpy as np
+from test_cases import test_cases
 
 #%% Game Input
-v,e,g = (8,13,2)
-graph = np.array([[False,  True,  True,  True, False, False, False, False],
-       [ True, False, False,  True, False, False, False,  True],
-       [ True, False, False,  True, False, False,  True, False],
-       [ True,  True,  True, False,  True,  True,  True,  True],
-       [False, False, False,  True, False, False, False,  True],
-       [False, False, False,  True, False, False,  True, False],
-       [False, False,  True,  True, False,  True, False, False],
-       [False,  True, False,  True,  True, False, False, False]])
-gws = {4, 5}
+test_case = test_cases[3]
+v,e,g,graph,gws,si =[k[1] for k in test_case.items()]
 
 #%% Game init
 PLAYER,AGENT = (0,1)
@@ -88,7 +81,6 @@ def minimax(state):
     return a
     
 #%% Turn input
-si = 0
 
 # Play
 init_state = (None,PLAYER,graph,gw_links,si)
