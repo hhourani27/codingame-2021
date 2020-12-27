@@ -41,7 +41,7 @@ test_cases = {
 'start_pos' : 9,
 },
 #Test 03 : One elevator per floor
-# -1565- -1491- 87 nodes in game tree 
+# -1565- -1491- -87- 140 nodes in game tree 
 3:{'nb_floors' : 6,
 'width' : 13,
 'nb_rounds' : 100,
@@ -55,7 +55,7 @@ test_cases = {
 'start_pos' : 1,
 },
 #Test 04 : 2 Missing 'elevators'
-# -1306- -1281- -1193- -150- 99 nodes in game tree 
+# -1306- -1281- -1193- -150- -99- 216 nodes in game tree 
 4:{'nb_floors' : 6,
 'width' : 13,
 'nb_rounds' : 100,
@@ -69,7 +69,7 @@ test_cases = {
 'start_pos' : 10,
 },
 #Test 05 : 3 Missing 'elevators'
-# -805- -769- -737- -163- 109 nodes in game tree 
+# -805- -769- -737- -163- -109- 210 nodes in game tree 
 5:{'nb_floors' : 7,
 'width' : 13,
 'nb_rounds' : 30,
@@ -83,7 +83,7 @@ test_cases = {
 'start_pos' : 4,
 },
 #Test 06 : Best path
-# -433- 412 nodes in game tree 
+# -433- -412- 453 nodes in game tree 
 6:{'nb_floors' : 10,
 'width' : 19,
 'nb_rounds' : 47,
@@ -97,7 +97,7 @@ test_cases = {
 'start_pos' : 6,
 },
 #Test 07 : Missing elevator
-# -1729- -1600- -810- 684 nodes in game tree 
+# -1729- -1600- -810- -684- 818 nodes in game tree 
 7:{'nb_floors' : 10,
 'width' : 19,
 'nb_rounds' : 42,
@@ -111,7 +111,7 @@ test_cases = {
 'start_pos' : 6,
 },
 #Test 08 : Trap
-# 2554 nodes in game tree 
+# -2554- 6653 nodes in game tree 
 8:{'nb_floors' : 13,
 'width' : 36,
 'nb_rounds' : 67,
@@ -125,7 +125,7 @@ test_cases = {
 'start_pos' : 6,
 },
 #Test 09 : Few clones
-#  nodes in game tree 
+# 5372  nodes in game tree 
 9:{'nb_floors' : 13,
 'width' : 69,
 'nb_rounds' : 79,
@@ -139,7 +139,7 @@ test_cases = {
 'start_pos' : 33,
 },
 #Test 10 : Giant map
-#  nodes in game tree 
+# 38719 nodes in game tree 
 10:{'nb_floors' : 13,
 'width' : 69,
 'nb_rounds' : 109,
@@ -175,26 +175,26 @@ def printActions(end_node, parent) :
 
 #%%
 
-test_case = test_cases[8]
+test_case = test_cases[10]
 nb_floors,width,nb_rounds,exit_floor,exit_pos,nb_total_clones,nb_add_elevators,nb_elevators,elevators,start_floor,start_pos=[k[1] for k in test_case.items()]
 
 
 #Node
 #(f,y,direction,round,elevators,clones_left,add_elevators_left,action_for_next_round)
-
+        
 allowed_y_elevators = dict()
 allowed_y_elevators[0] = set()
 for i in range(1,exit_floor-1):
     allowed_y_elevators[i] = set()
     for e in elevators + ((0,start_pos),):
         if e[0] == i-1:
-                allowed_y_elevators[i].add(e[1])
+            allowed_y_elevators[i].add(e[1])
 allowed_y_elevators[exit_floor-1] = {exit_pos}
 
 for i in range(1,exit_floor):
     if len(allowed_y_elevators[i]) == 0:
         allowed_y_elevators[i] = allowed_y_elevators[i-1]
-    
+
 
 start_state = (start_floor,start_pos,RIGHT,1,nb_total_clones,nb_add_elevators)
 start_WAIT = start_state + (WAIT,)
@@ -278,20 +278,10 @@ while len(frontier) > 0:
     
     if next_clones_left > 0 and next_add_elevator_left > 0 and next_f < exit_floor:
         if (next_f,next_y) not in elevators : #don't add an elevator on an existing elevator
-            if next_y in allowed_y_elevators[next_f] :  #only add elevators under an existing elevator or under exit
+            if next_y in allowed_y_elevators[next_f] :  #only add elevators above an existing elevator or under exit
                 next_ELEVATOR = next_state + (ELEVATOR,)
                 frontier.append(next_ELEVATOR)
                 parent[next_ELEVATOR] = current
 
 
 printActions(current, parent)
-
-#%%
-'''
-for after,before in parent.items():
-    if before == (0, 33, 0, 1, 5, 2):
-        print(after)
-'''
-frontier = list(frontier)
-f1 = list(filter(lambda x :x[0] == 0 and x[6] == BLOCK,frontier))
-f2 = sorted(f1, key = lambda x : (x[0],x[1]))	
