@@ -1,9 +1,10 @@
 import numpy as np
 from collections import deque
 from test_cases import test_cases
+import time
 
 #%% Game Input
-test_case = test_cases[4]
+test_case = test_cases[5]
 v,e,g,graph,gws,si =[k[1] for k in test_case.items()]
 
 #%% Game init
@@ -13,7 +14,9 @@ for gw in gws:
     gwps = graph[gw].nonzero()[0]
     for gwp in gwps:
         gw_links.add((gwp,gw))
-        
+
+shortest_path_cache = dict()
+
 node_counter = 0
 
 #%% Minimax setup
@@ -29,6 +32,11 @@ def utility(state):
     if state[4] in gws : return -1
     
 def shortest_path(graph,start,goal):
+    #verify cache
+    key = (start,goal) if start < goal else (goal,start)
+    if key in shortest_path_cache:
+        return shortest_path_cache[key]
+    
     frontier = deque([start])
     parent = {start:None}
     
@@ -47,7 +55,9 @@ def shortest_path(graph,start,goal):
     if found_goal is True:
         while True:
             prev_node = parent[current]
-            if prev_node == start: return current
+            if prev_node == start:
+                shortest_path_cache[key] = current
+                return current
             current = prev_node
     else:
         return None
@@ -124,5 +134,10 @@ def minimax(state):
 #%% Turn input
 
 # Play
+start_time = time.time()
+
 init_state = (None,PLAYER,graph,gw_links,si)
 action = minimax(init_state)
+
+duration = (time.time()-start_time)
+print('Visited {} nodes in {:.3f} s'.format(node_counter, duration))

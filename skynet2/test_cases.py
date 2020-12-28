@@ -55,7 +55,7 @@ test_cases = {
 # Test case 3 : Leading up to a double gateway
 # expected game tree size: 614M
 # Game tree : -61297- -23221- 1753 nodes
-# Solution (9,0)
+# Solution (9,0) in -0.015- 0.007s
 3: {
     'v': 12,
     'e': 20,
@@ -78,7 +78,7 @@ test_cases = {
 # Test case 4 : Ordered gateways
 # expected game tree size: 660M
 # Game tree : -25294- 13192 nodes
-# Solution (1,12)
+# Solution (1,12) in -0.160- 0.04s
 4: {
     'v': 22,
     'e': 37,
