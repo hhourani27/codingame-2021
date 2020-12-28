@@ -73,7 +73,25 @@ def shortest_path(graph,start,goal):
         
 
     else:
-        return None
+def closest_gw_links(gw_links,graph,agentPos):
+    min_distance = 1000
+    gwps = get_gwps(gw_links)
+    distance = dict()
+    
+    for gwp in gwps:
+        dist = shortest_path(graph, agentPos, gwp)[1]
+        distance[gwp] = dist
+        if dist < min_distance:
+            min_distance = dist
+            
+    result = set()
+    for gwl in gw_links:
+        gwp, gw = gwl
+        if(distance[gwp] == min_distance):
+            result.add(gwl)
+            
+    return result
+        
 
 def successors(state) :
     action,player,graph,gw_links,agentPos = state
@@ -94,10 +112,25 @@ def successors(state) :
             successors.append((gwl,AGENT,next_graph,next_gw_links,agentPos))
 
         else:
-#        gw_links_sorted = sorted(list(gw_links),key=lambda x:gw_link_dangerosity(x,graph,agentPos) )
-        for gwl in gw_links:
+            gw_links_multi = list(filter(lambda x: links_to_gw(gw_links,x[0]) > 1,gw_links))
+            if len(gw_links_multi) > 0:
+                #only choose gw_link with >1 siblings
+                for gwl in gw_links_multi:
             gwp,gw = gwl
+                    next_graph = graph.copy()
+                    next_graph[gwp][gw] = False
+                    next_graph[gw][gwp] = False
+        
+                    next_gw_links = gw_links.copy()
+                    next_gw_links.remove(gwl)            
+                    successors.append((gwl,AGENT,next_graph,next_gw_links,agentPos))
+            else :
+                #if no gw_links with > siblings, choose closest gwp
+                gw_links_closest = closest_gw_links(gw_links,graph,agentPos)
             
+  #              print('{}=>{}'.format(gw_links,gw_links_closest))
+                for gwl in gw_links_closest:
+                    gwp,gw = gwl
             next_graph = graph.copy()
             next_graph[gwp][gw] = False
             next_graph[gw][gwp] = False
@@ -105,6 +138,7 @@ def successors(state) :
             next_gw_links = gw_links.copy()
             next_gw_links.remove(gwl)            
             successors.append((gwl,AGENT,next_graph,next_gw_links,agentPos))
+
 
     elif player == AGENT:
         if agentPos in gwps:
