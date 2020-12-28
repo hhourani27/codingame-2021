@@ -29,7 +29,7 @@ test_cases = {
                        [False, False,  True,  True, False,  True, False, False],
                        [False,  True, False,  True,  True, False, False, False]]),
     'gws': {4,5},
-    'si': 0
+    'agent': 0
     },
 # Test case 2 : Linked double gateways
 # expected game tree size: 1475
@@ -50,7 +50,7 @@ test_cases = {
                        [ True, False,  True, False, False, False, False, False, False,True],
                        [ True,  True,  True, False, False, False, False,  True,  True,False]]),
     'gws': {3, 4, 5, 6},
-    'si': 0
+    'agent': 0
     },
 # Test case 3 : Leading up to a double gateway
 # expected game tree size: 614M
@@ -73,7 +73,7 @@ test_cases = {
                        [False, False, False, False, False, False, False, False,  True,True, False,  True],
                        [False, False, False, False, False,  True, False, False, False,True,  True, False]]),
     'gws': {0, 7},
-    'si': 8
+    'agent': 8
     },
 # Test case 4 : Ordered gateways
 # expected game tree size: 660M
@@ -106,7 +106,7 @@ test_cases = {
        [False, False, False, False, False, False, False,  True, False,False, False, False, False, False, False, False, False, False,False, False, False, False],
        [False, False, False,  True, False, False, False, False, False,True,  True, False, False, False, False, False, False, False,False, False, False, False]]),
     'gws': {11, 12, 15, 16, 18, 19, 20},
-    'si': 0
+    'agent': 0
     },
 # Test case 5 : Complex mesh
 # expected game tree size: 1.6E31
@@ -154,7 +154,7 @@ test_cases = {
                         [0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],
                         [0,0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]]),
     'gws': {0, 16, 18, 26},
-    'si': 2
+    'agent': 2
     },
 # Test case 6 : Skynet core network
 # expected game tree size: 8.4E38
@@ -214,7 +214,7 @@ test_cases = {
                         [0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],
                         [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0]]),
     'gws': {34, 35, 36, 37, 6, 7, 8, 9, 38, 11, 12, 16, 17, 18, 22, 28, 29},
-    'si': 0
+    'agent': 0
     },
 
 }
@@ -223,7 +223,7 @@ test_cases = {
 #%%
 def estimate_tree_size(n):
     test_case = test_cases[n]
-    v,e,g,graph,gws,si =[k[1] for k in test_case.items()]
+    v,e,g,graph,gws,agent =[k[1] for k in test_case.items()]
     
     gwl = 0
     for gw in gws:
