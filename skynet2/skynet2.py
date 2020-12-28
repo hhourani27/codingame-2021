@@ -4,7 +4,7 @@ from test_cases import test_cases
 import time
 
 #%% Game Input
-test_case = test_cases[5]
+test_case = test_cases[6]
 v,e,g,graph,gws,si =[k[1] for k in test_case.items()]
 
 #%% Game init
@@ -57,6 +57,8 @@ def shortest_path(graph,start,goal):
         current = frontier.popleft()
         if current == goal:
             break
+        if current in gws:
+            continue
         neighbors = graph[current].nonzero()[0]
         for neighbor in neighbors:
             if neighbor not in parent:
@@ -136,7 +138,6 @@ def successors(state) :
                 #if no gw_links with > siblings, choose closest gwp
                 gw_links_closest = closest_gw_links(gw_links,graph,agentPos)
             
-  #              print('{}=>{}'.format(gw_links,gw_links_closest))
                 for gwl in gw_links_closest:
                     gwp,gw = gwl
             next_graph = graph.copy()
