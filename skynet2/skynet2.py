@@ -3,7 +3,7 @@ from collections import deque
 from test_cases import test_cases
 
 #%% Game Input
-test_case = test_cases[2]
+test_case = test_cases[4]
 v,e,g,graph,gws,si =[k[1] for k in test_case.items()]
 
 #%% Game init
@@ -75,9 +75,9 @@ def successors(state) :
                 if n in gws:
                     successors.append((n,PLAYER,graph,gw_links,n))
         else:
-            for gwp in gwps:
-                closest_node = shortest_path(graph, agentPos, gwp)
-                successors.append((closest_node,PLAYER,graph,gw_links,closest_node))
+            closest_nodes = {shortest_path(graph, agentPos, gwp) for gwp in gwps}
+            for n in closest_nodes:
+                successors.append((n,PLAYER,graph,gw_links,n))
     
 #    print('{} -> {}'.format(state,successors))
     return successors
