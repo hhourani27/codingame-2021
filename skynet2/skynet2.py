@@ -39,6 +39,9 @@ def terminal(state):
     if agentPos in gws : return -1
     if agentPos in get_gwps(gw_links) and links_to_gw(gw_links,agentPos) > 1: return -1
     
+    gw_links_multi = list(filter(lambda x: links_to_gw(gw_links,x[0]) > 1,gw_links))
+    if len(gw_links_multi) == 0: return 1
+    
     return None
     
 def shortest_path(graph,start,goal):
@@ -79,6 +82,11 @@ def closest_gw_links(gw_links,graph,agentPos):
     distance = dict()
     
     for gwp in gwps:
+        if gwp == agentPos:
+            distance[gwp] = 0
+            min_distance = 0
+            
+        else:
         dist = shortest_path(graph, agentPos, gwp)[1]
         distance[gwp] = dist
         if dist < min_distance:

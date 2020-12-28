@@ -14,7 +14,7 @@ import math
 test_cases = {
 # Test case 1 : Robust double gateways
 # expected game tree size: 2678
-# Game tree : -2093- -179- -287- -75- -146- -109- -99- 51 nodes
+# Game tree : -2093- -179- -287- -75- -146- -109- -99- -51- 3 nodes
 # Solution : (3,4)
 1: {
     'v': 8,
@@ -33,7 +33,7 @@ test_cases = {
     },
 # Test case 2 : Linked double gateways
 # expected game tree size: 1475
-# Game tree :-2273- -477- -277- -105- -107- -99- -77- 55 nodes
+# Game tree :-2273- -477- -277- -105- -107- -99- -77- -55- 19 nodes
 # Solution (2,5) or (2,6)
 2: {
     'v': 10,
@@ -54,7 +54,7 @@ test_cases = {
     },
 # Test case 3 : Leading up to a double gateway
 # expected game tree size: 614M
-# Game tree : -61297- -23221- -1753- -877- 31 nodes
+# Game tree : -61297- -23221- -1753- -877- -31- 2 nodes
 # Solution (9,0) in -0.015- 0.007s
 3: {
     'v': 12,
@@ -77,7 +77,7 @@ test_cases = {
     },
 # Test case 4 : Ordered gateways
 # expected game tree size: 660M
-# Game tree : -25294- -13192- -6833- -10343- 4933 nodes
+# Game tree : -25294- -13192- -6833- -10343- -4933- 169 nodes
 # Solution (1,12) in -0.160- 0.04s
 4: {
     'v': 22,
@@ -110,8 +110,8 @@ test_cases = {
     },
 # Test case 5 : Complex mesh
 # expected game tree size: 1.6E31
-# Game tree :  nodes
-# Solution 
+# Game tree : 285 nodes
+# Solution (27,16)
 5: {
     'v': 37,
     'e': 81,
