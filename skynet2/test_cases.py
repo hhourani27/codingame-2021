@@ -6,9 +6,15 @@ Created on Sun Dec 27 20:05:54 2020
 """
 import numpy as np
 
+# gwl = gw links
+# avb = average # edges for each node
+# Approximate # nodes in game tree = avb^gwl * gwl!
+
 test_cases = {
 # Test case 1 : Robust double gateways
-# Game tree :2093 nodes
+# expected game tree size: 2678
+# Game tree : -2093- -179- 287 nodes
+# Solution : (3,4)
 1: {
     'v': 8,
     'e': 13,
@@ -25,7 +31,9 @@ test_cases = {
     'si': 0
     },
 # Test case 2 : Linked double gateways
-# Game tree :2273 nodes
+# expected game tree size: 1475
+# Game tree :-2273- -477- 277 nodes
+# Solution (2,5) or (2,6)
 2: {
     'v': 10,
     'e': 14,
@@ -44,7 +52,8 @@ test_cases = {
     'si': 0
     },
 # Test case 3 : Leading up to a double gateway
-# Game tree : nodes
+# expected game tree size: 614M
+# Game tree : 61297 nodes
 3: {
     'v': 12,
     'e': 20,
