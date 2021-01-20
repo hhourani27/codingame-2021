@@ -42,7 +42,7 @@ else:
     while len(tree_t) > 0:
         # get all leaves
         leaves = [v for v in tree_t.keys() if len(tree_t[v]) == 0]
-        # get parents of all leaves and update cover
+        # get parents of all leaves and 
         parents = set()
         cover_new = set()
         for v in leaves:
@@ -52,9 +52,7 @@ else:
                 cover_new.add(reverse_tree_t[v])
             else:
                 cover_new.add(v)
-    #    parents = {reverse_tree[v] for v in leaves if v in reverse_tree}
         # add parents to cover
-    #    cover.update(parents)
         # delete all leaves
         for v in leaves:
             del tree_t[v]
