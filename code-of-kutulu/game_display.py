@@ -45,7 +45,8 @@ class GameDisplay:
             }
         
         # Font
-        self.font = ("Courier", 16)
+        self.font = "Courier"
+        self.font_size = 16
         
         # Game variables
         self.turn = 0
@@ -73,17 +74,21 @@ class GameDisplay:
         self.window.mainloop()
 
     def draw_control(self):
-        self.label_turn = tk.Label(master=self.control_frame, font=self.font, bg='white',borderwidth=0,highlightthickness = 0)
+        self.label_turn = tk.Label(master=self.control_frame, font=(self.font,self.font_size), bg='white',borderwidth=0,highlightthickness = 0)
         self.label_turn.grid(row=0, column=0, padx=20, pady=20)
         
         self.label_players = []
         for i in range(len(self.game.explorers)):
-            label_players = tk.Label(master=self.control_frame, font=self.font, bg='white', fg=self.player_colors[i] ,borderwidth=0,highlightthickness = 0)
-            label_players.grid(row=(i+1)*2,column=0, padx=20, pady=20)
-            self.label_players.append(label_players)
+            label_players = tk.Label(master=self.control_frame, font=(self.font,self.font_size), bg='white', fg=self.player_colors[i],borderwidth=0,highlightthickness = 0)
+            label_players.grid(row=(i+1)*2,column=0, padx=5, pady=5,sticky=tk.W)
+            label_players2 = tk.Label(master=self.control_frame, font=(self.font,7), bg='white', fg=self.player_colors[i] ,borderwidth=0,highlightthickness = 0)
+            label_players2.grid(row=(i+1)*2+1,column=0, padx=5, pady=5, sticky=tk.W)
+
+            self.label_players.append((label_players,label_players2))
     
         self.update_labels()
         
+        #Buttons        
         self.button_frame = tk.Frame(master=self.control_frame, bg='white', relief=tk.RAISED, borderwidth=1)
         self.button_frame.grid(row=(len(self.game.explorers)+1)*2, column=0, padx=20, pady=20)
         
@@ -99,16 +104,20 @@ class GameDisplay:
     def update_labels(self):
         self.label_turn.config(text='Turn {}'.format(self.turn))
         
-        for i,label_ex in enumerate(self.label_players):
+        for i,lbls_ex in enumerate(self.label_players):
+            lbl1,lbl2 = lbls_ex
             ex = self.game.explorers[i]
             
             if self.turn <= ex.last_turn:
                 info = ex.history[self.turn]
                 txt = 'Player {} {} : {}'.format(i, self.state_emoji[info['state']], info['sanity'])
+                txt2 = '{} : {}'.format(info['move'][0],info['move'][1])
             else:
                 info = ex.history[-1]
                 txt = 'Player {} {} : {}'.format(i, self.state_emoji[info['state']], info['sanity'])
-            label_ex.config(text = txt)
+                txt2 = '{} : {}'.format(info['move'][0],info['move'][1])
+            lbl1.config(text = txt)
+            lbl2.config(text = txt2)
         
     def draw_grid(self):
         

@@ -1,6 +1,6 @@
 from mazes import mazes
 import numpy as np
-import random
+from collections import deque
 
 class Explorer:
     def __init__(self,id,pos,player):
@@ -10,7 +10,9 @@ class Explorer:
         # START, PANIC, CALM, DEAD
         self.state = 'START'
         self.sanity = 250
+        
         self.last_turn = -1
+        self.move = (None,None)
         
         self.player = player
         
@@ -22,7 +24,8 @@ class Explorer:
             'turn': turn,
             'state': self.state,
             'pos': self.pos,
-            'sanity': self.sanity
+            'sanity': self.sanity,
+            'move' : self.move
             }
         self.history.append(hist)
 
@@ -57,7 +60,23 @@ class Game:
                 move = ex.player.next_move(ex.pos)
                 if move != 'WAIT':
                     x,y = [int(p) for p in move[5:].split()]
-                    ex.pos = (x,y)
+                    if 0 <= x < self.w and 0 <= y < self.h and self.maze[y][x] != '#':
+                        if (x,y) != ex.pos:
+                            next_pos = self.shortest_path(fr=ex.pos, to=(x,y))
+                            if next_pos is not None:
+                                move_result = 'Shortest path from {} to {} : {}'.format(ex.pos,(x,y),next_pos)
+                                ex.pos = next_pos
+                            else:
+                                move_result = 'Cannot reach cell {}'.format((x,y))
+                        else:
+                            move_result = 'Want to move to same position {}'.format((x,y))
+                    else:
+                        move_result = 'Cannot go to wall or outside grid'
+                else:
+                    move_result = 'Wait'
+                    
+                ex.move = (move,move_result)
+                        
             
             # Update explorer's sanity
             for ex in live_explorers:
@@ -92,6 +111,35 @@ class Game:
                 if self.manhattan_distance(ex.pos,eo.pos) <= 2:
                     return True
         return False
+    
+    def shortest_path(self,fr,to):
+        print('shortest path from {} to {}'.format(fr,to))
+        xf,yf = fr
+        xt,yt = to
+        
+        frontier = deque()
+        frontier.append((xt,yt))
+        came_from = dict()
+        came_from[(xt,yt)] = None
+        
+        while len(frontier) > 0:
+            curr = frontier.popleft()
+            x,y = curr
+            
+            if curr == fr:
+                break
+            
+            adjacent_cells= [(x-1,y),(x+1,y),(x,y-1),(x,y+1)]
+            next_cells = [(xn,yn) for xn,yn in adjacent_cells \
+                     if 0 <= xn < self.w and 0 <= yn < self.h and self.maze[yn][xn] != '#']
+                
+            for next in next_cells:
+                if next not in came_from:
+                    frontier.append(next)
+                    came_from[next] = curr
+        
+        return came_from[fr] if fr in came_from else None
+
     
     def farthest_spawns(self):
         distances = np.zeros((4,len(self.spawns)),dtype=np.int8)
