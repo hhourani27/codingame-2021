@@ -10,6 +10,8 @@ game = Game(players)
 
 # play game
 game.play()
+winners = game.winners()
+print('Winners {}'.format([ex.id for ex in winners]))
 
 #%%
 # display game

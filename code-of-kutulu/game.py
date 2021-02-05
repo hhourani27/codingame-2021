@@ -179,6 +179,14 @@ class Game:
                     return True
         return False
     
+    def winners(self):
+        live_explorers = self.get_live_explorers()
+        if len(live_explorers) == 1:
+            return live_explorers
+        else:        
+            max_turn = max([ex.last_turn for ex in self.explorers])
+            return [ex for ex in self.explorers if ex.last_turn==max_turn]
+    
     @staticmethod
     def shortest_path(maze,w,h,fr,to):
         if fr == to:
