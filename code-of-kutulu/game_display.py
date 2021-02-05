@@ -111,13 +111,13 @@ class GameDisplay:
             if self.turn <= ex.last_turn:
                 info = ex.history[self.turn]
                 txt = 'Player {} {} : {}'.format(i, self.state_emoji[info['state']], info['sanity'])
-                txt2 = '{} : {}'.format(info['move'][0],info['move'][1])
+                #txt2 = '{} : {}'.format(info['move'][0],info['move'][1])
             else:
                 info = ex.history[-1]
                 txt = 'Player {} {} : {}'.format(i, self.state_emoji[info['state']], info['sanity'])
-                txt2 = '{} : {}'.format(info['move'][0],info['move'][1])
+                #txt2 = '{} : {}'.format(info['move'][0],info['move'][1])
             lbl1.config(text = txt)
-            lbl2.config(text = txt2)
+            #lbl2.config(text = txt2)
         
     def draw_grid(self):
         
@@ -144,11 +144,15 @@ class GameDisplay:
 
     def draw_entities(self):
         self.player_pawns = []
-        for i in range(len(self.game.explorers)):
-            ex = self.game.explorers[i]
-            pawn = self.canvas.create_oval(0,0,self.grid_cell_size//2,self.grid_cell_size//2,fill=self.player_colors[i])
+        for ex in self.game.explorers:
+            pawn = self.canvas.create_oval(0,0,self.grid_cell_size//2,self.grid_cell_size//2,fill=self.player_colors[ex.id])
             self.player_pawns.append(pawn)
-            
+        
+        self.wanderer_pawns = []
+        for w in self.game.wanderers:
+            pawn = self.canvas.create_rectangle(0,0,self.grid_cell_size//2,self.grid_cell_size//2,fill='yellow',width=2)
+            self.wanderer_pawns.append(pawn)
+        
         self.update_entities()
             
     def update_entities(self):
@@ -167,6 +171,22 @@ class GameDisplay:
             x = tl[0] + p_coords[i][0]
             y = tl[1] + p_coords[i][1]
             self.canvas.coords(self.player_pawns[i],x,y,x+pawn_size,y+pawn_size)
+            
+        # Update wanderer pawns
+        for i,wp in enumerate(self.wanderer_pawns):
+            w = self.game.wanderers[i]
+            state = [s for s in w.history if s['turn'] == self.turn and s['state'] != 'DISAPPEARED']
+            if len(state) == 0:
+                self.canvas.itemconfigure(wp, state='hidden')
+            else:
+                state = state[0]
+                self.canvas.itemconfigure(wp, state='normal')
+                self.canvas.itemconfigure(wp, outline='gray' if state['target'] is None else self.player_colors[state['target']])
+                pos = state['pos']
+                tl,br = self.cell_pos(*pos)
+                x,y = tl
+                self.canvas.coords(wp,x,y,x+pawn_size,y+pawn_size)
+            
     
     def cell_pos(self,x,y):
         tl = (self.grid_tl_x + self.grid_cell_size*x, self.grid_tl_y + self.grid_cell_size*y)
