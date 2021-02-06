@@ -1,3 +1,6 @@
 __pycache__
 .pylint.d
 vscode-profile-*
+neat-checkpoint-*
+*.gv
+*.svg
