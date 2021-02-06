@@ -1,13 +1,5 @@
 """
-Neural network for the code of kutulu player
-
-Input nodes : 
-    max width of maze * max height of maze * |[WALL,EMPTY_CELL,MY_POS,OTHER_PLAYERS,WANDERERS]|
-    = 24*20*5 = 2400
-    
-Output nodes : 
-    max width of maze * max height of maze
-    = 24*20 = 480
+2-input XOR example -- this is most likely the simplest possible example.
 """
 
 from __future__ import print_function
@@ -68,5 +60,5 @@ def run(config_file):
 #%%
 
 local_dir = os.path.dirname(__file__)
-config_path = os.path.join(local_dir, 'neat-kutulu.config')
+config_path = os.path.join(local_dir, 'neat-test.config')
 run(config_path)
